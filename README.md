@@ -239,7 +239,11 @@ This action is available at `MichaelFisher1997/godiffy-gitactions`. Use it in yo
 
 ### Repository URL
 - **GitHub**: https://github.com/MichaelFisher1997/godiffy-gitactions
-- **Action**: `MichaelFisher1997/godiffy-gitactions@v1`
+- **Action**: `MichaelFisher1997/godiffy-gitactions@v1` (stable)
+- **Action (dev)**: `MichaelFisher1997/godiffy-gitactions@dev` (uses dev backend)
+
+### Development Branch
+The `dev` branch is configured to use the Godiffy development backend at `https://godiffy-backend-dev.up.railway.app`. Use this branch for testing and development purposes.
 
 ### Quick Setup
 
