@@ -28,7 +28,7 @@ jobs:
         run: npm run test:screenshots
         
       - name: Upload screenshots to Godiffy
-        uses: godiffy/upload-action@v1
+        uses: MichaelFisher1997/godiffy-gitactions@v1
         with:
           api-key: ${{ secrets.GODIFFY_API_KEY }}
           images-path: './screenshots'
@@ -51,7 +51,7 @@ jobs:
         run: npm run test:screenshots
         
       - name: Upload and compare screenshots
-        uses: godiffy/upload-action@v1
+        uses: MichaelFisher1997/godiffy-gitactions@v1
         with:
           api-key: ${{ secrets.GODIFFY_API_KEY }}
           images-path: './screenshots'
@@ -153,7 +153,7 @@ jobs:
         run: npm run test:visual
         
       - name: Upload to Godiffy
-        uses: godiffy/upload-action@v1
+        uses: MichaelFisher1997/godiffy-gitactions@v1
         with:
           api-key: ${{ secrets.GODIFFY_API_KEY }}
           images-path: './screenshots'
@@ -182,7 +182,7 @@ jobs:
         run: npm run test:visual:${{ matrix.browser }}
         
       - name: Upload screenshots
-        uses: godiffy/upload-action@v1
+        uses: MichaelFisher1997/godiffy-gitactions@v1
         with:
           api-key: ${{ secrets.GODIFFY_API_KEY }}
           images-path: './screenshots/${{ matrix.browser }}'
@@ -233,6 +233,24 @@ This action uses the Godiffy API v2. For more details, see the [Godiffy API docu
 - `POST /api/v2/sites/{siteId}/reports` - Create comparison report
 - `GET /api/v2/sites/{siteId}/reports/{reportId}` - Get report results
 
+## Usage
+
+This action is available at `MichaelFisher1997/godiffy-gitactions`. Use it in your GitHub workflows as shown in the examples above.
+
+### Repository URL
+- **GitHub**: https://github.com/MichaelFisher1997/godiffy-gitactions
+- **Action**: `MichaelFisher1997/godiffy-gitactions@v1`
+
+### Quick Setup
+
+1. **Add the action to your workflow** (see examples above)
+2. **Set up secrets** in your GitHub repository:
+   - Go to Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Add `GODIFFY_API_KEY` with your Godiffy API key
+3. **Configure your site ID** in the action inputs
+4. **Run your workflow** to upload screenshots
+
 ## Contributing
 
 1. Fork this repository
@@ -248,8 +266,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - 📖 [Documentation](https://docs.godiffy.com)
-- 🐛 [Issues](https://github.com/godiffy/upload-action/issues)
-- 💬 [Discussions](https://github.com/godiffy/upload-action/discussions)
+- 🐛 [Issues](https://github.com/MichaelFisher1997/godiffy-gitactions/issues)
+- 💬 [Discussions](https://github.com/MichaelFisher1997/godiffy-gitactions/discussions)
 
 ---
 
