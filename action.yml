@@ -1,0 +1,81 @@
+name: 'Godiffy Visual Regression'
+description: 'Upload visual regression test screenshots to Godiffy and generate comparison reports'
+author: 'Godiffy'
+branding:
+  icon: 'camera'
+  color: 'blue'
+
+inputs:
+  api-key:
+    description: 'Godiffy API key for authentication'
+    required: true
+  images-path:
+    description: 'Path to folder containing images (relative or absolute)'
+    required: true
+  site-id:
+    description: 'Godiffy site identifier'
+    required: true
+  branch:
+    description: 'Git branch name'
+    required: false
+    default: ${{ github.ref_name }}
+  commit:
+    description: 'Git commit SHA'
+    required: false
+    default: ${{ github.sha }}
+  base-url:
+    description: 'Godiffy API base URL'
+    required: false
+    default: 'https://godiffy-backend-dev.up.railway.app'
+  create-report:
+    description: 'Whether to generate a comparison report'
+    required: false
+    default: 'false'
+  baseline-branch:
+    description: 'Branch to compare against (required if create-report is true)'
+    required: false
+  baseline-commit:
+    description: 'Commit SHA to compare against'
+    required: false
+    default: 'latest'
+  report-name:
+    description: 'Custom name for the report'
+    required: false
+  report-description:
+    description: 'Description for the report'
+    required: false
+  comparison-algorithm:
+    description: 'Algorithm to use (pixelmatch, ssim)'
+    required: false
+    default: 'pixelmatch'
+  comparison-threshold:
+    description: 'Threshold for differences (0.0-1.0)'
+    required: false
+    default: '0.1'
+
+outputs:
+  upload-count:
+    description: 'Number of images successfully uploaded'
+  failed-count:
+    description: 'Number of images that failed to upload'
+  upload-ids:
+    description: 'JSON array of upload IDs'
+  report-id:
+    description: 'Report ID if report was created'
+  report-url:
+    description: 'URL to view the report in Godiffy dashboard'
+  differences-found:
+    description: 'Boolean indicating if visual differences were detected'
+  total-comparisons:
+    description: 'Number of image comparisons performed'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Godiffy action
+      shell: bash
+      run: |
+        chmod +x ${{ github.action_path }}/main.sh
+        chmod +x ${{ github.action_path }}/upload.sh
+        chmod +x ${{ github.action_path }}/generate-report.sh
+        ${{ github.action_path }}/main.sh
