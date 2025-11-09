@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import fsSync from 'node:fs';
-import { chromium } from 'playwright';
 
 function getInput(name, { required = false, defaultValue } = {}) {
   // GitHub Actions preserves hyphens in input names, so we need to check both formats
@@ -86,6 +85,16 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
 
 async function captureScreenshots({ configPath, branch }) {
   logInfo(`Reading configuration from ${configPath}...`);
+  
+  // Dynamically import playwright only when needed
+  let chromium;
+  try {
+    const playwright = await import('playwright');
+    chromium = playwright.chromium;
+  } catch (err) {
+    logError(`Failed to import playwright: ${err.message}. Make sure dependencies are installed.`);
+    process.exit(1);
+  }
   
   let config;
   try {
