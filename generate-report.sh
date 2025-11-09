@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "=== SCRIPT STARTED ===" >&2
+
 # Debug trap to catch where script fails
 trap 'echo "DEBUG: Script failed at line $LINENO with exit code $?" >&2' ERR
 
