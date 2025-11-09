@@ -51,9 +51,6 @@ else
     FAILED+=("{\"file\":\"$API_PATH\",\"error\":\"$ERROR_MSG\"}")
     echo "::error::❌ Failed to upload $API_PATH: $ERROR_MSG" >&2
   fi
-    FAILED+=("{\"file\":\"$API_PATH\",\"error\":\"$ERROR_MSG\"}")
-    echo "::error::❌ Failed to upload $API_PATH: $ERROR_MSG"
-  fi
 done < <(find "$IMAGES_PATH" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -print0)
 
 # Output JSON results
