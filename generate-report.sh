@@ -49,7 +49,7 @@ if [ "$BASELINE_COMMIT" = "latest" ]; then
   echo "DEBUG: Baseline API response: $BASELINE_RESPONSE" >&2
   
   # Filter by branch and get most recent commit
-  BASELINE_COMMIT=$(echo "$BASELINE_RESPONSE" | jq -r --arg branch "$BASELINE_BRANCH" '.uploads[] | select(.branch == $branch) | .commit' | head -n1)
+  BASELINE_COMMIT=$(echo "$BASELINE_RESPONSE" | jq -r --arg branch "$BASELINE_BRANCH" '.[] | select(.branch == $branch) | .commit' | head -n1)
   
   echo "DEBUG: Extracted baseline commit: $BASELINE_COMMIT" >&2
   
@@ -61,13 +61,10 @@ if [ "$BASELINE_COMMIT" = "latest" ]; then
   
   echo "Using latest commit: $BASELINE_COMMIT"
 fi
-  
-  echo "Using latest commit: $BASELINE_COMMIT"
-fi
 
 # Fetch baseline uploads for specific commit
 echo "DEBUG: About to fetch baseline uploads..." >&2
-BASELINE_URL="$BASE_URL/api/v2/sites/$SITE_ID/uploads?branch=$(printf %s "$BASELINE_BRANCH" | jq -sRr @uri)&commit=$(printf %s "$BASELINE_COMMIT" | jq -sRr @uri)"
+BASELINE_URL="$BASE_URL/api/v2/uploads?siteId=$(printf %s "$SITE_ID" | jq -sRr @uri)&branch=$(printf %s "$BASELINE_BRANCH" | jq -sRr @uri)&commit=$(printf %s "$BASELINE_COMMIT" | jq -sRr @uri)"
 echo "DEBUG: Baseline URL: $BASELINE_URL" >&2
 
 BASELINE_RESPONSE=$(curl -s \
@@ -83,16 +80,8 @@ if [ $CURL_EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-# Handle different response structures
-# Check if response is an array directly or has .uploads property
-if echo "$BASELINE_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
-  BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c '.')
-elif echo "$BASELINE_RESPONSE" | jq -e 'has("uploads")' >/dev/null 2>&1; then
-  BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c '.uploads')
-else
-  echo "DEBUG: Unexpected baseline response structure: $BASELINE_RESPONSE"
-  BASELINE_UPLOADS="[]"
-fi
+# Handle response structure - API returns direct array
+BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c '.')
 
 echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS"
 echo "DEBUG: Baseline uploads count: $(echo "$BASELINE_UPLOADS" | jq '. | length')"
