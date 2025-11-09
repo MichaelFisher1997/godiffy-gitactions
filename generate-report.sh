@@ -105,7 +105,7 @@ echo "DEBUG: Finished counting baseline uploads..." >&2
 echo "DEBUG: About to print upload results..." >&2
 echo "DEBUG: UPLOAD_RESULTS variable is set: ${UPLOAD_RESULTS+yes}" >&2
 echo "DEBUG: UPLOAD_RESULTS length: ${#UPLOAD_RESULTS}" >&2
-echo "DEBUG: Upload results: $UPLOAD_RESULTS" >&2
+echo "DEBUG: Upload results (first 200 chars): $(echo "$UPLOAD_RESULTS" | head -c 200)..." >&2
 echo "DEBUG: Finished printing upload results..." >&2
 
 # Ensure we have valid JSON and array
