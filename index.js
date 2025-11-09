@@ -369,8 +369,21 @@ async function main() {
   }
 
   const candidateBranch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
-  const candidateCommit = process.env.GITHUB_SHA || '';
   const eventName = process.env.GITHUB_EVENT_NAME || '';
+  
+  // For PRs, use the actual HEAD SHA of the PR branch, not the merge commit
+  let candidateCommit = process.env.GITHUB_SHA || '';
+  if (eventName === 'pull_request' && process.env.GITHUB_EVENT_PATH) {
+    try {
+      const eventData = JSON.parse(await fs.readFile(process.env.GITHUB_EVENT_PATH, 'utf-8'));
+      if (eventData.pull_request?.head?.sha) {
+        candidateCommit = eventData.pull_request.head.sha;
+        logInfo(`Using PR head commit: ${candidateCommit}`);
+      }
+    } catch (err) {
+      logWarn(`Could not read PR head SHA from event, using GITHUB_SHA: ${err.message}`);
+    }
+  }
 
   logInfo('Starting GoDiffy action v2...');
 
