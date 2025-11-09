@@ -95,8 +95,11 @@ if [ $JQ_EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS"
-echo "DEBUG: Baseline uploads count: $(echo "$BASELINE_UPLOADS" | jq '. | length')"
+echo "DEBUG: About to print baseline uploads..." >&2
+echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS" >&2
+echo "DEBUG: About to count baseline uploads..." >&2
+echo "DEBUG: Baseline uploads count: $(echo "$BASELINE_UPLOADS" | jq '. | length')" >&2
+echo "DEBUG: Finished counting baseline uploads..." >&2
 
 # Match candidate uploads with baseline uploads by path
 echo "DEBUG: Upload results: $UPLOAD_RESULTS"
