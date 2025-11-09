@@ -14,14 +14,10 @@ FAILED=()
 
 # Find all image files recursively
 while IFS= read -r -d '' file; do
-  echo "DEBUG: Processing file: $file" >&2
-  echo "DEBUG: IMAGES_PATH: $IMAGES_PATH" >&2
   # Calculate relative path from images directory
   RELATIVE_PATH=$(realpath --relative-to="$IMAGES_PATH" "$file")
-  echo "DEBUG: RELATIVE_PATH: $RELATIVE_PATH" >&2
   # Ensure leading slash
   API_PATH="/$RELATIVE_PATH"
-  echo "DEBUG: API_PATH: $API_PATH" >&2
   
   echo "Uploading $API_PATH..." >&2
   
@@ -38,15 +34,13 @@ while IFS= read -r -d '' file; do
   HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
   BODY=$(echo "$RESPONSE" | sed '$d')
   
-  echo "DEBUG: HTTP_CODE=$HTTP_CODE" >&2
-  echo "DEBUG: BODY=$BODY" >&2
+  
   
   if [ "$HTTP_CODE" -eq 200 ]; then
     UPLOAD_ID=$(echo "$BODY" | jq -r '.id')
     SUCCESSFUL+=("$(echo "$BODY" | jq -c '.')")
     echo "✅ Uploaded $API_PATH (ID: $UPLOAD_ID)" >&2
 else
-    echo "DEBUG: Non-200 response, attempting to parse error..." >&2
     if echo "$BODY" | jq . >/dev/null 2>&1; then
       ERROR_MSG=$(echo "$BODY" | jq -r '.error // "Unknown error"')
     else

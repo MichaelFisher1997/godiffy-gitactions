@@ -1,16 +1,7 @@
 #!/bin/bash
 set -e
 
-# Add debugging to see what environment variables are being set
-echo "=== DEBUG: All INPUT_ environment variables ==="
-env | grep "^INPUT_" | sort
-echo "=== END DEBUG ==="
-echo "=== DEBUG: Input values ==="
-echo "API_KEY length: ${#INPUT_API_KEY}"
-echo "API_KEY is empty: $([ -z "$INPUT_API_KEY" ] && echo "YES" || echo "NO")"
-echo "IMAGES_PATH: '$INPUT_IMAGES_PATH'"
-echo "SITE_ID: '$INPUT_SITE_ID'"
-echo "=== END DEBUG ==="
+
 
 # Get inputs from action.yml (GitHub Actions sets these as env vars)
 # Handle both hyphen and underscore formats for backward compatibility
@@ -50,10 +41,6 @@ fi
 echo "::group::Uploading images"
 UPLOAD_RESULTS=$(bash "$GITHUB_ACTION_PATH/upload.sh" "$BASE_URL" "$API_KEY" "$SITE_ID" "$BRANCH" "$COMMIT" "$IMAGES_PATH")
 UPLOAD_EXIT_CODE=$?
-echo "DEBUG: Upload script exit code: $UPLOAD_EXIT_CODE"
-echo "DEBUG: Upload results raw output:"
-echo "$UPLOAD_RESULTS"
-echo "DEBUG: End of upload results"
 echo "::endgroup::"
 
 if [ $UPLOAD_EXIT_CODE -ne 0 ]; then
@@ -62,18 +49,9 @@ if [ $UPLOAD_EXIT_CODE -ne 0 ]; then
 fi
 
 # Parse upload results (JSON output from upload.sh)
-echo "DEBUG: Attempting to parse upload results with jq..."
-if echo "$UPLOAD_RESULTS" | jq . >/dev/null 2>&1; then
-  echo "DEBUG: Valid JSON detected"
-  UPLOAD_COUNT=$(echo "$UPLOAD_RESULTS" | jq -r '.successful | length')
-  FAILED_COUNT=$(echo "$UPLOAD_RESULTS" | jq -r '.failed | length')
-  UPLOAD_IDS=$(echo "$UPLOAD_RESULTS" | jq -c '[.successful[].id]')
-else
-  echo "DEBUG: Invalid JSON detected in upload results"
-  echo "DEBUG: Upload results content: '$UPLOAD_RESULTS'"
-  echo "::error::Upload script returned invalid JSON: $UPLOAD_RESULTS"
-  exit 1
-fi
+UPLOAD_COUNT=$(echo "$UPLOAD_RESULTS" | jq -r '.successful | length')
+FAILED_COUNT=$(echo "$UPLOAD_RESULTS" | jq -r '.failed | length')
+UPLOAD_IDS=$(echo "$UPLOAD_RESULTS" | jq -c '[.successful[].id]')
 
 # Set outputs
 echo "upload-count=$UPLOAD_COUNT" >> $GITHUB_OUTPUT
