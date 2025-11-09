@@ -40,7 +40,7 @@ if [ "$BASELINE_COMMIT" = "latest" ]; then
   fi
 
   # Ensure the response is an array before running array-only jq expressions
-  if ! echo "$BASELINE_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
+  if ! echo "$BASELINE_RESPONSE" | jq -e 'try type == "array" catch false' >/dev/null 2>&1; then
     echo "::error::Unexpected baseline uploads response when resolving latest commit for branch $BASELINE_BRANCH" >&2
     echo "DEBUG: Baseline latest raw response: $BASELINE_RESPONSE" >&2
     exit 1
