@@ -150,6 +150,12 @@ if [ ${#COMPARISONS[@]} -eq 0 ]; then
   echo "::error::No matching baseline images found. Ensure $BASELINE_BRANCH has uploaded screenshots."
   echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS"
   echo "DEBUG: Candidate uploads: $CANDIDATE_UPLOADS"
+  echo "DEBUG: Testing manual match..."
+  # Test manual matching
+  CANDIDATE_PATH_TEST=$(echo "$CANDIDATE_UPLOADS" | jq -r '.[0].objectKey')
+  BASELINE_MATCH_TEST=$(echo "$BASELINE_UPLOADS" | jq -r --arg path "$CANDIDATE_PATH_TEST" '.[] | select(.objectKey == $path) | .id')
+  echo "DEBUG: Test candidate path: $CANDIDATE_PATH_TEST"
+  echo "DEBUG: Test baseline match: $BASELINE_MATCH_TEST"
   exit 1
 fi
 
