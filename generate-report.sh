@@ -41,13 +41,29 @@ BASELINE_RESPONSE=$(curl -s \
 echo "DEBUG: Baseline response: $BASELINE_RESPONSE"
 
 # Handle different response structures
-BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c 'if .uploads then .uploads else . end')
+# Check if response is an array directly or has .uploads property
+if echo "$BASELINE_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
+  BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c '.')
+elif echo "$BASELINE_RESPONSE" | jq -e 'has("uploads")' >/dev/null 2>&1; then
+  BASELINE_UPLOADS=$(echo "$BASELINE_RESPONSE" | jq -c '.uploads')
+else
+  echo "DEBUG: Unexpected baseline response structure: $BASELINE_RESPONSE"
+  BASELINE_UPLOADS="[]"
+fi
 
 echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS"
 
 # Match candidate uploads with baseline uploads by path
 echo "DEBUG: Upload results: $UPLOAD_RESULTS"
-CANDIDATE_UPLOADS=$(echo "$UPLOAD_RESULTS" | jq -c '.successful')
+
+# Ensure we have valid JSON and array
+if echo "$UPLOAD_RESULTS" | jq -e 'has("successful")' >/dev/null 2>&1; then
+  CANDIDATE_UPLOADS=$(echo "$UPLOAD_RESULTS" | jq -c '.successful')
+else
+  echo "DEBUG: Unexpected upload results structure: $UPLOAD_RESULTS"
+  CANDIDATE_UPLOADS="[]"
+fi
+
 echo "DEBUG: Candidate uploads: $CANDIDATE_UPLOADS"
 COMPARISONS=()
 
