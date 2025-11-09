@@ -4,6 +4,7 @@ set -e
 # Debug trap to catch where script fails
 trap 'echo "DEBUG: Script failed at line $LINENO with exit code $?" >&2' ERR
 
+echo "DEBUG: generate-report.sh started successfully!"
 echo "DEBUG: Script started with $# arguments"
 echo "DEBUG: Arguments: $*"
 
