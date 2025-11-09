@@ -121,7 +121,12 @@ async function captureScreenshots({ configPath, branch }) {
   const screenshotsDir = config.screenshotsDir || './screenshots';
   const viewport = config.viewport || { width: 1280, height: 720 };
 
-  // Ensure screenshots directory exists
+  // Clean and recreate screenshots directory
+  try {
+    await fs.rm(screenshotsDir, { recursive: true, force: true });
+  } catch (err) {
+    // Ignore if directory doesn't exist
+  }
   await fs.mkdir(screenshotsDir, { recursive: true });
 
   logInfo(`Capturing ${pages.length} screenshots from ${baseUrl}...`);
