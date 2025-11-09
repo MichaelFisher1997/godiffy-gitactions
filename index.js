@@ -237,6 +237,7 @@ async function resolveBaselineCommit({ baseUrl, apiKey, siteId, baselineBranch, 
 
   const url = new URL('/api/v2/uploads', baseUrl);
   url.searchParams.set('siteId', siteId);
+  url.searchParams.set('limit', '1000'); // Get more results to ensure we find baseline uploads
 
   const res = await fetchWithRetry(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
