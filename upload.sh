@@ -34,12 +34,20 @@ while IFS= read -r -d '' file; do
   HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
   BODY=$(echo "$RESPONSE" | sed '$d')
   
+  echo "DEBUG: HTTP_CODE=$HTTP_CODE"
+  echo "DEBUG: BODY=$BODY"
+  
   if [ "$HTTP_CODE" -eq 200 ]; then
     UPLOAD_ID=$(echo "$BODY" | jq -r '.id')
     SUCCESSFUL+=("$(echo "$BODY" | jq -c '.')")
     echo "✅ Uploaded $API_PATH (ID: $UPLOAD_ID)"
   else
-    ERROR_MSG=$(echo "$BODY" | jq -r '.error // "Unknown error"')
+    echo "DEBUG: Non-200 response, attempting to parse error..."
+    if echo "$BODY" | jq . >/dev/null 2>&1; then
+      ERROR_MSG=$(echo "$BODY" | jq -r '.error // "Unknown error"')
+    else
+      ERROR_MSG="Invalid JSON response: $BODY"
+    fi
     FAILED+=("{\"file\":\"$API_PATH\",\"error\":\"$ERROR_MSG\"}")
     echo "::error::❌ Failed to upload $API_PATH: $ERROR_MSG"
   fi
