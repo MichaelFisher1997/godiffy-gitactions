@@ -38,8 +38,8 @@ echo "Fetching baseline uploads from $BASELINE_BRANCH@$BASELINE_COMMIT..."
 # Fetch baseline uploads
 if [ "$BASELINE_COMMIT" = "latest" ]; then
   echo "DEBUG: Looking for latest uploads on branch $BASELINE_BRANCH" >&2
-  # Get all uploads for the branch and find the most recent commit
-  BASELINE_URL="$BASE_URL/api/v2/sites/$SITE_ID/uploads?branch=$(printf %s "$BASELINE_BRANCH" | jq -sRr @uri)"
+  # Get all uploads for the site and find the most recent commit for the branch
+  BASELINE_URL="$BASE_URL/api/v2/sites/$SITE_ID/uploads"
   echo "DEBUG: Fetching from: $BASELINE_URL" >&2
   
   BASELINE_RESPONSE=$(curl -s \
@@ -48,7 +48,8 @@ if [ "$BASELINE_COMMIT" = "latest" ]; then
   
   echo "DEBUG: Baseline API response: $BASELINE_RESPONSE" >&2
   
-  BASELINE_COMMIT=$(echo "$BASELINE_RESPONSE" | jq -r '.uploads[0].commit // empty')
+  # Filter by branch and get the most recent commit
+  BASELINE_COMMIT=$(echo "$BASELINE_RESPONSE" | jq -r --arg branch "$BASELINE_BRANCH" '.uploads[] | select(.branch == $branch) | .commit' | head -n1)
   
   echo "DEBUG: Extracted baseline commit: $BASELINE_COMMIT" >&2
   
