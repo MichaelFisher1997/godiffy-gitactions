@@ -73,6 +73,20 @@ if [ "$CREATE_REPORT" = "true" ]; then
   echo "::group::Generating comparison report"
   REPORT_NAME="${REPORT_NAME:-$BRANCH vs $BASELINE_BRANCH}"
   
+  echo "DEBUG: About to call generate-report.sh with:"
+  echo "DEBUG: BASE_URL=$BASE_URL"
+  echo "DEBUG: API_KEY=***"
+  echo "DEBUG: SITE_ID=$SITE_ID"
+  echo "DEBUG: UPLOAD_RESULTS=$UPLOAD_RESULTS"
+  echo "DEBUG: BRANCH=$BRANCH"
+  echo "DEBUG: COMMIT=$COMMIT"
+  echo "DEBUG: BASELINE_BRANCH=$BASELINE_BRANCH"
+  echo "DEBUG: BASELINE_COMMIT=$BASELINE_COMMIT"
+  echo "DEBUG: REPORT_NAME=$REPORT_NAME"
+  echo "DEBUG: REPORT_DESCRIPTION=$REPORT_DESCRIPTION"
+  echo "DEBUG: ALGORITHM=$ALGORITHM"
+  echo "DEBUG: THRESHOLD=$THRESHOLD"
+  
   REPORT_RESULTS=$(bash "$GITHUB_ACTION_PATH/generate-report.sh" \
     "$BASE_URL" \
     "$API_KEY" \
