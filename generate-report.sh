@@ -121,23 +121,34 @@ echo "DEBUG: Candidate uploads count: $(echo "$CANDIDATE_UPLOADS" | jq '. | leng
 echo "DEBUG: About to start comparison loop..."
 COMPARISONS=()
 
+echo "DEBUG: Starting comparison loop..." >&2
+echo "DEBUG: BASELINE_UPLOADS sample: $(echo "$BASELINE_UPLOADS" | jq -c '.[0]')" >&2
+echo "DEBUG: CANDIDATE_UPLOADS sample: $(echo "$CANDIDATE_UPLOADS" | jq -c '.[0]')" >&2
+
 while IFS= read -r candidate; do
-  echo "DEBUG: Processing candidate: $candidate"
+  echo "DEBUG: Processing candidate: $candidate" >&2
   CANDIDATE_PATH=$(echo "$candidate" | jq -r '.objectKey')
   CANDIDATE_ID=$(echo "$candidate" | jq -r '.id')
-  echo "DEBUG: Extracted path: $CANDIDATE_PATH, id: $CANDIDATE_ID"
+  echo "DEBUG: Extracted path: $CANDIDATE_PATH, id: $CANDIDATE_ID" >&2
   
-  # Find matching baseline
+  # Find matching baseline - try exact string match first
+  echo "DEBUG: Searching for baseline with path: $CANDIDATE_PATH" >&2
   BASELINE_ID=$(echo "$BASELINE_UPLOADS" | jq -r --arg path "$CANDIDATE_PATH" '.[] | select(.objectKey == $path) | .id')
-  echo "DEBUG: Found baseline ID for path $CANDIDATE_PATH: $BASELINE_ID"
+  echo "DEBUG: Found baseline ID for path $CANDIDATE_PATH: '$BASELINE_ID'" >&2
   
-  if [ -n "$BASELINE_ID" ]; then
+  # Debug: show all baseline paths for comparison
+  echo "DEBUG: All baseline paths:" >&2
+  echo "$BASELINE_UPLOADS" | jq -r '.[].objectKey' >&2
+  
+  if [ -n "$BASELINE_ID" ] && [ "$BASELINE_ID" != "null" ]; then
+    echo "DEBUG: Creating comparison for path $CANDIDATE_PATH" >&2
     COMPARISON=$(jq -n \
       --arg path "$CANDIDATE_PATH" \
       --arg baselineId "$BASELINE_ID" \
       --arg candidateId "$CANDIDATE_ID" \
       '{path: $path, baselineUploadId: $baselineId, candidateUploadId: $candidateId}')
     COMPARISONS+=("$COMPARISON")
+    echo "DEBUG: Added comparison: $COMPARISON" >&2
   else
     echo "::warning::No baseline found for $CANDIDATE_PATH"
   fi
@@ -150,12 +161,20 @@ if [ ${#COMPARISONS[@]} -eq 0 ]; then
   echo "::error::No matching baseline images found. Ensure $BASELINE_BRANCH has uploaded screenshots."
   echo "DEBUG: Baseline uploads: $BASELINE_UPLOADS"
   echo "DEBUG: Candidate uploads: $CANDIDATE_UPLOADS"
-  echo "DEBUG: Testing manual match..."
+  echo "DEBUG: Testing manual match..." >&2
   # Test manual matching
   CANDIDATE_PATH_TEST=$(echo "$CANDIDATE_UPLOADS" | jq -r '.[0].objectKey')
+  echo "DEBUG: Test candidate path: '$CANDIDATE_PATH_TEST'" >&2
+  echo "DEBUG: Full baseline uploads for debugging:" >&2
+  echo "$BASELINE_UPLOADS" | jq '.' >&2
   BASELINE_MATCH_TEST=$(echo "$BASELINE_UPLOADS" | jq -r --arg path "$CANDIDATE_PATH_TEST" '.[] | select(.objectKey == $path) | .id')
-  echo "DEBUG: Test candidate path: $CANDIDATE_PATH_TEST"
-  echo "DEBUG: Test baseline match: $BASELINE_MATCH_TEST"
+  echo "DEBUG: Test baseline match result: '$BASELINE_MATCH_TEST'" >&2
+  
+  # Try alternative matching method
+  echo "DEBUG: Trying alternative matching..." >&2
+  ALT_MATCH=$(echo "$BASELINE_UPLOADS" | jq -r --arg path "$CANDIDATE_PATH_TEST" '.[] | if .objectKey == $path then .id else empty end')
+  echo "DEBUG: Alternative match result: '$ALT_MATCH'" >&2
+  
   exit 1
 fi
 
