@@ -1,7 +1,9 @@
 #!/bin/bash
-# set -e  # Temporarily disabled to see actual error
+set -e
 
 echo "=== SCRIPT STARTED ===" >&2
+echo "DEBUG: All environment variables:" >&2
+env | grep -E '^(GITHUB_|INPUT_|)' | sort >&2
 
 # Debug trap to catch where script fails
 trap 'echo "DEBUG: Script failed at line $LINENO with exit code $?" >&2' ERR
