@@ -28,19 +28,25 @@ echo "Fetching baseline uploads from $BASELINE_BRANCH@$BASELINE_COMMIT..."
 if [ "$BASELINE_COMMIT" = "latest" ]; then
   echo "Looking for latest uploads on branch $BASELINE_BRANCH" >&2
 
-  # Fetch all uploads for the site
   BASELINE_URL="$BASE_URL/api/v2/uploads?siteId=$(printf %s "$SITE_ID" | jq -sRr @uri)"
   BASELINE_RESPONSE=$(curl -s \
     -H "Authorization: Bearer $API_KEY" \
     "$BASELINE_URL")
 
-  # If API responded with an error object, surface it clearly
+  # Detect explicit API error objects (ignore jq failure)
   if echo "$BASELINE_RESPONSE" | jq -e 'type == "object" and has("error")' >/dev/null 2>&1; then
-    echo "::error::Failed to fetch baseline uploads for latest commit on branch $BASELINE_BRANCH: $(echo "$BASELINE_RESPONSE" | jq -r '.error')"
+    echo "::error::Failed to fetch baseline uploads for latest commit on branch $BASELINE_BRANCH: $(echo "$BASELINE_RESPONSE" | jq -r '.error')" >&2
     exit 1
   fi
 
-  # Expect an array of uploads; filter by branch and pick latest by createdAt
+  # Ensure the response is an array before running array-only jq expressions
+  if ! echo "$BASELINE_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
+    echo "::error::Unexpected baseline uploads response when resolving latest commit for branch $BASELINE_BRANCH" >&2
+    echo "DEBUG: Baseline latest raw response: $BASELINE_RESPONSE" >&2
+    exit 1
+  fi
+
+  # Safely compute latest commit for the baseline branch
   BASELINE_COMMIT=$(echo "$BASELINE_RESPONSE" |
     jq -r --arg branch "$BASELINE_BRANCH" '
       map(select(.branch == $branch))
@@ -50,8 +56,8 @@ if [ "$BASELINE_COMMIT" = "latest" ]; then
     ')
 
   if [ -z "$BASELINE_COMMIT" ]; then
-    echo "::error::No uploads found for site $SITE_ID on branch $BASELINE_BRANCH when resolving latest baseline commit"
-    echo "DEBUG: Baseline latest response: $BASELINE_RESPONSE" >&2
+    echo "::error::No uploads found for site $SITE_ID on branch $BASELINE_BRANCH when resolving latest baseline commit" >&2
+    echo "DEBUG: Baseline latest response (no matching branch): $BASELINE_RESPONSE" >&2
     exit 1
   fi
 
