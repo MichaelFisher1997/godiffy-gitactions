@@ -74,7 +74,9 @@ runs:
       run: |
         cd ${{ github.action_path }}
         npm install --production
-        npx playwright install chromium --with-deps
+        if [ "${{ inputs.capture-screenshots }}" = "true" ]; then
+          npx playwright install chromium --with-deps
+        fi
     
     - name: Run action
       shell: bash
