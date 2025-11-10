@@ -482,11 +482,9 @@ async function main() {
     logInfo(`All comparisons passed (average similarity: ${comparisonResults.averageSimilarity}%)`);
   }
 
-  // Log result but don't exit - let the workflow handle failure based on outputs
+  // Log result - workflow will handle failure based on threshold-met output
   if (!meetsThreshold) {
-    logError(`Visual regression check failed: Average similarity ${avgSimilarity.toFixed(2)}% is below threshold of ${thresholdPercent}%`);
-    // Exit with error code so the step shows as failed
-    process.exitCode = 1;
+    logWarn(`Visual regression check failed: Average similarity ${avgSimilarity.toFixed(2)}% is below threshold of ${thresholdPercent}%`);
   } else {
     logInfo(`✓ Visual regression check passed: ${avgSimilarity.toFixed(2)}% similarity (threshold: ${thresholdPercent}%)`);
   }
